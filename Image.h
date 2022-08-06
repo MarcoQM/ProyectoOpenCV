@@ -6,31 +6,31 @@
 
 #include <opencv2/opencv.hpp>
 
+template<typename PixelType>
+using DataType = std::vector<std::vector<PixelType>>;
+
 template<typename PixelType> //uchar->intensity, vector<uchar> rgb
 class Image
 {
 
-    using DataType = std::vector<std::vector<PixelType>>; //matrix
+    //using DataType = std::vector<std::vector<PixelType>>; //matrix
 
 public:
     Image(){};
 
     void Read(const std::string& fileName);
     void Show();
+    DataType<PixelType>& GetData();
     std::vector<std::vector<unsigned>> Histogram();
 
 private:
 
-    DataType Data; // matriz de pixels
+    DataType<PixelType> Data; // matriz de pixels
 
     std::size_t Rows{};
     std::size_t Columns{};
 
 };
-
-
-
-
 
 template<typename  PixelType>
 void Image<PixelType>::Read(const std::string& fileName)
@@ -47,7 +47,7 @@ void Image<PixelType>::Read(const std::string& fileName)
     Rows = image.rows;
     Columns = image.cols;
 
-    Data = DataType(Rows, std::vector<PixelType>(Columns, PixelType{}));
+    Data = DataType<PixelType>(Rows, std::vector<PixelType>(Columns, PixelType{}));
 
     uchar red, green, blue;
     for (unsigned r=0; r < Rows; ++r)
@@ -78,10 +78,18 @@ void Image<PixelType>::Read(const std::string& fileName)
 
     //std::cout<<image.ptr<cv::Vec3b>(0)[0]<<"\n";
     //std::cout<<+Data[0][0][0]<<","<<+Data[0][0][1]<<","<<+Data[0][0][2]<<"\n";
-    cv::namedWindow("Image", cv::WINDOW_AUTOSIZE);
+    /*cv::namedWindow("Image", cv::WINDOW_AUTOSIZE);
     cv::imshow("Image", image);
-    cv::waitKey(0);
+    cv::waitKey(0);*/
 
+}
+
+
+
+template<typename  PixelType>
+DataType<PixelType>& Image<PixelType>::GetData()
+{
+    return Data;
 }
 
 template<typename  PixelType>
@@ -119,8 +127,8 @@ void Image<PixelType>::Show()
         }
     }
 
-    cv::namedWindow("Image 2", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Image 2", imageShow);
+    cv::namedWindow("Imagen Cargada", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Imagen Cargada", imageShow);
     cv::waitKey(0);
 
 }

@@ -1,26 +1,23 @@
-#include <iostream>
-#include "Image.h"
-#include "RGB.h"
-#include<vector>
+#ifndef PADDING_H
+#define PADDING_H
 
-template<typename PixelType>
-using DataType = std::vector<std::vector<PixelType>>;
+#include <vector>
+#include <string>
 
-template<typename PixelType>
-void imprimir(DataType<PixelType> imagen)
+template<typename PixelType> //uchar->intensity, vector<uchar> rgb
+class Padding
 {
-    for(unsigned i = 0; i < imagen.size(); ++i)
-    {
-        for(unsigned j = 0; j < imagen[i].size(); ++j)
-        {
-            std::cout<<imagen[i][j]<<" ";
-        }
-        std::cout<<std::endl;
-    }
-}
+public:
+    Padding(){};
+
+    std::vector<std::vector<PixelType>> paddingConstantvalue(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize);
+    std::vector<std::vector<PixelType>> paddingMirror(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize);
+    std::vector<std::vector<PixelType>> paddingExpanded(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize);
+    std::vector<std::vector<PixelType>> paddingPeriodicRepetitions(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize);
+};
 
 template<typename PixelType>
-DataType<PixelType> paddingConstantvalue(DataType<PixelType>& imagen, unsigned paddingSize, uchar value = 0)
+std::vector<std::vector<PixelType>> paddingConstantvalue(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -28,7 +25,7 @@ DataType<PixelType> paddingConstantvalue(DataType<PixelType>& imagen, unsigned p
     std::size_t paddingRows = imagen.size() + 2*paddingSize;
     std::size_t paddingColumns = imagen[0].size() + 2*paddingSize;
 
-    DataType<PixelType> paddedImage = DataType<PixelType>(paddingRows, std::vector<PixelType>(paddingColumns, PixelType{value}));
+    std::vector<std::vector<unsigned>> paddedImage = std::vector<std::vector<PixelType>>(paddingRows, std::vector<PixelType>(paddingColumns, 0));
 
     for(unsigned i = 0; i < Rows; ++i)
     {
@@ -41,7 +38,7 @@ DataType<PixelType> paddingConstantvalue(DataType<PixelType>& imagen, unsigned p
 }
 
 template<typename PixelType>
-DataType<PixelType> paddingMirror(DataType<PixelType>& imagen, unsigned paddingSize)
+std::vector<std::vector<PixelType>> paddingMirror(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -49,7 +46,7 @@ DataType<PixelType> paddingMirror(DataType<PixelType>& imagen, unsigned paddingS
     std::size_t paddingRows = Rows + 2*paddingSize;
     std::size_t paddingColumns = Columns + 2*paddingSize;
 
-    DataType<PixelType> paddedImage = DataType<PixelType>(paddingRows, std::vector<PixelType>(paddingColumns, PixelType{0}));
+    std::vector<std::vector<unsigned>> paddedImage = std::vector<std::vector<PixelType>>(paddingRows, std::vector<PixelType>(paddingColumns, 0));
 
     for(unsigned i = 0; i < Rows; ++i)
     {
@@ -111,7 +108,7 @@ DataType<PixelType> paddingMirror(DataType<PixelType>& imagen, unsigned paddingS
 }
 
 template<typename PixelType>
-DataType<PixelType> paddingExpanded(DataType<PixelType>& imagen, unsigned paddingSize)
+std::vector<std::vector<PixelType>> paddingExpanded(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -119,7 +116,7 @@ DataType<PixelType> paddingExpanded(DataType<PixelType>& imagen, unsigned paddin
     std::size_t paddingRows = Rows + 2*paddingSize;
     std::size_t paddingColumns = Columns + 2*paddingSize;
 
-    DataType<PixelType> paddedImage = DataType<PixelType>(paddingRows, std::vector<PixelType>(paddingColumns, PixelType{0}));
+    std::vector<std::vector<unsigned>> paddedImage = std::vector<std::vector<PixelType>>(paddingRows, std::vector<PixelType>(paddingColumns, 0));
 
     for(unsigned i = 0; i < Rows; ++i)
     {
@@ -169,7 +166,7 @@ DataType<PixelType> paddingExpanded(DataType<PixelType>& imagen, unsigned paddin
 }
 
 template<typename PixelType>
-DataType<PixelType> paddingPeriodicRepetitions(DataType<PixelType>& imagen, unsigned paddingSize)
+std::vector<std::vector<PixelType>> paddingPeriodicRepetitions(std::vector<std::vector<PixelType>>& imagen, unsigned paddingSize)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -177,7 +174,7 @@ DataType<PixelType> paddingPeriodicRepetitions(DataType<PixelType>& imagen, unsi
     std::size_t paddingRows = Rows + 2*paddingSize;
     std::size_t paddingColumns = Columns + 2*paddingSize;
 
-    DataType<PixelType> paddedImage = DataType<PixelType>(paddingRows, std::vector<PixelType>(paddingColumns, PixelType{0}));
+    std::vector<std::vector<unsigned>> paddedImage = std::vector<std::vector<PixelType>>(paddingRows, std::vector<PixelType>(paddingColumns, 0));
 
     for(unsigned i = 0; i < Rows; ++i)
     {
@@ -226,40 +223,7 @@ DataType<PixelType> paddingPeriodicRepetitions(DataType<PixelType>& imagen, unsi
     return paddedImage;
 }
 
-template<typename PixelType>
-void convolution(Image<PixelType> image)
-{
-
-}
 
 
 
-
-int main()
-{
-
-    Image<RGB<uchar>> image;
-    image.Read("/home/marco/ProyectosQt/OpenCV_Example/image.jpg");
-    image.Show();
-
-    imprimir(paddingMirror(image.GetData(), 2));
-
-
-    /*std::vector<std::vector<unsigned>> imagen = {{1, 2, 3},
-                                                 {4, 5, 6},
-                                                 {7, 8, 9}};*/
-
-    /*imagen = {{1, 2, 3, 4, 5},
-              {2, 3, 4, 5, 6},
-              {3, 4, 5, 6, 7},
-              {4, 5, 6, 7, 8}};*/
-
-    //paddingConstantvalue(imagen, 1);
-
-
-    //imprimir(paddingConstantvalue(imagen, 2, 6));
-    //imprimir(paddingConstantvalue(imagen, 2, 7));
-
-
-    return 0;
-}
+#endif // PADDING_H
