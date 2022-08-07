@@ -13,14 +13,15 @@ void imprimir(DataType<PixelType> imagen)
     {
         for(unsigned j = 0; j < imagen[i].size(); ++j)
         {
-            std::cout<<imagen[i][j]<<" ";
+            //std::cout<<imagen[i][j]<<" ";
+            std::cout<<static_cast<int>(imagen[i][j])<<" ";
         }
         std::cout<<std::endl;
     }
 }
 
 template<typename PixelType>
-DataType<PixelType> paddingConstantvalue(DataType<PixelType>& imagen, unsigned paddingSize, uchar value = 0)
+DataType<PixelType> paddingConstantValue(DataType<PixelType>& imagen, unsigned paddingSize, uchar value = 0)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -226,10 +227,41 @@ DataType<PixelType> paddingPeriodicRepetitions(DataType<PixelType>& imagen, unsi
     return paddedImage;
 }
 
+// Padding, Kernel K, Factor de scala S, padding, valor de padding(solo caso1)
 template<typename PixelType>
-void convolution(Image<PixelType> image)
+DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> kernel, int scale, std::string padding, unsigned valuePadding = 0)
 {
+    std::size_t Rows = imagen.size();
+    std::size_t Columns = imagen[0].size();
 
+    DataType<PixelType> imagePadding;
+    DataType<PixelType> result = DataType<PixelType>(Rows, std::vector<PixelType>(Columns, PixelType{0}));
+
+    //Tamanio del padding
+    unsigned paddingSize = kernel.size()/2;
+
+    //Padding selection
+    imagePadding = paddingMirror(imagen, paddingSize);
+
+    for(unsigned i = 0; i < Rows; ++i)
+    {
+        for(unsigned j = 0; j < Columns; ++j)
+        {
+            float m=0;
+            //for para el kernel
+            for(unsigned h = 0; h < kernel.size(); ++h)
+            {
+                for(unsigned k = 0; k < kernel[h].size(); ++k)
+                {
+                    m = m + imagePadding[h+i][k+j] * kernel[h][k];
+                }
+
+            }
+            result[i][j] = m/scale;
+        }
+    }
+
+    return result;
 }
 
 
@@ -238,11 +270,73 @@ void convolution(Image<PixelType> image)
 int main()
 {
 
-    Image<RGB<uchar>> image;
+    Image<uchar> image;
     image.Read("/home/marco/ProyectosQt/OpenCV_Example/image.jpg");
-    image.Show();
+    //image.Show();
 
-    imprimir(paddingMirror(image.GetData(), 2));
+
+    std::vector<std::vector<float>> kernel = {{1, 1, 1},
+                                              {1, 1, 1},
+                                              {1, 1, 1}};
+
+    std::vector<std::vector<float>> kernel2 = {{0, 0, 0, 0, 0},
+                                               {0, 1, 1, 1, 0},
+                                               {0, 1, 1, 1, 0},
+                                               {0, 1, 1, 1, 0},
+                                               {0, 0, 0, 0, 0}};
+
+    std::vector<std::vector<float>> kernel3 = {{0, 1, 2, 1, 0},
+                                               {1, 3, 5, 3, 1},
+                                               {2, 5, 9, 5, 2},
+                                               {1, 3, 5, 3, 1},
+                                               {0, 1, 2, 1, 0}};
+
+    std::vector<std::vector<float>> kernel4 = {{0, 0, -1, 0, 0},
+                                               {0, -1, -2, -1, 0},
+                                               {-1, -2, 16, -2, -1},
+                                               {0, -1, -2, -1, 0},
+                                               {0, 0, -1, 0, 0}};
+
+    std::vector<std::vector<float>> kernel5 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+
+    std::vector<std::vector<float>> kernel6 = {{0, 1, 0},
+                                               {1, -4, 1},
+                                               {0, 1, 0}};
+
+    std::vector<std::vector<float>> kernel7 = {{-2, -1, 0},
+                                               {-1, 1, 1},
+                                               {0, 1, 2}};
+
+    std::vector<std::vector<uchar>> test = {{1, 2, 3},
+                                            {4, 5, 6},
+                                            {7, 8, 9}};
+
+    // Padding: Constant, Expanded, Mirror, Repetition
+    //convolution(image.GetData(), kernel, 9, "Constant");
+    Image<uchar> image2;
+    image2.SetData(convolution(image.GetData(), kernel7, 9, "Constant"));
+    //image2.SetData(convolution(test, kernel, 9, "Constant"));
+    image2.Show();
+    //imprimir(convolution(image.GetData(), kernel, 9, "Constant"));
+
+
+    /*Image<uchar> image2;
+    image2.SetData(paddingConstantValue(image.GetData(), 100));
+    image2.Show();*/
+
+    //imprimir(paddingMirror(image.GetData(), 2));
+
+
+
 
 
     /*std::vector<std::vector<unsigned>> imagen = {{1, 2, 3},
@@ -259,6 +353,12 @@ int main()
 
     //imprimir(paddingConstantvalue(imagen, 2, 6));
     //imprimir(paddingConstantvalue(imagen, 2, 7));
+
+
+
+
+
+
 
 
     return 0;

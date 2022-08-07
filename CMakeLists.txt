@@ -9,6 +9,6 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
-add_executable(OpenCV_Example  RGB.h Image.h Padding.h Convolution.h main.cpp)
+add_executable(OpenCV_Example  RGB.h Image.h Convolution.h main.cpp)
 
 target_link_libraries(OpenCV_Example ${OpenCV_LIBS} )

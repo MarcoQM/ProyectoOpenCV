@@ -21,7 +21,10 @@ public:
     void Read(const std::string& fileName);
     void Show();
     DataType<PixelType>& GetData();
+    void SetData(const DataType<PixelType>& otherData);
     std::vector<std::vector<unsigned>> Histogram();
+    std::size_t GetNumRows() const;
+    std::size_t GetNumColumns() const;
 
 private:
 
@@ -89,7 +92,30 @@ void Image<PixelType>::Read(const std::string& fileName)
 template<typename  PixelType>
 DataType<PixelType>& Image<PixelType>::GetData()
 {
-    return Data;
+    return this->Data;
+}
+
+template<typename  PixelType>
+void Image<PixelType>::SetData(const DataType<PixelType>& otherData)
+{
+    Data = otherData;
+    Rows = otherData.size();
+    Columns = otherData[0].size();
+
+    //std::cout<<"Rows: "<<Rows<<std::endl;
+    //std::cout<<"Columns: "<<Columns<<std::endl;
+}
+
+template<typename  PixelType>
+std::size_t Image<PixelType>::GetNumRows() const
+{
+    return Rows;
+}
+
+template<typename  PixelType>
+std::size_t Image<PixelType>::GetNumColumns() const
+{
+    return Columns;
 }
 
 template<typename  PixelType>
@@ -114,6 +140,7 @@ void Image<PixelType>::Show()
     else //RGB LAB, channels...
     {
         imageShow = cv::Mat(Rows, Columns, CV_8UC3);
+        std::cout<<Rows<<std::endl;
         for (unsigned r = 0; r < Rows; ++r)
         {
             cv::Vec3b* grayrow = imageShow.ptr<cv::Vec3b>(r);
