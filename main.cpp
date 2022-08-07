@@ -241,31 +241,37 @@ DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> ker
     unsigned paddingSize = kernel.size()/2;
 
     //Padding selection
+    // Padding: constant, expanded, mirror, repetition
     imagePadding = paddingMirror(imagen, paddingSize);
+    if(padding == "constant")
+    {imagePadding = paddingConstantValue(imagen, paddingSize, valuePadding);}
+    else if(padding == "expanded")
+    {imagePadding = paddingExpanded(imagen, paddingSize);}
+    else if(padding == "mirror")
+    {imagePadding = paddingMirror(imagen, paddingSize);}
+    else if(padding == "repetition")
+    {imagePadding = paddingPeriodicRepetitions(imagen, paddingSize);}
 
     for(unsigned i = 0; i < Rows; ++i)
     {
         for(unsigned j = 0; j < Columns; ++j)
         {
-            float m=0;
+            PixelType m{0};
             //for para el kernel
             for(unsigned h = 0; h < kernel.size(); ++h)
             {
                 for(unsigned k = 0; k < kernel[h].size(); ++k)
                 {
-                    m = m + imagePadding[h+i][k+j] * kernel[h][k];
+                    m = m + (imagePadding[h+i][k+j] * kernel[h][k]/scale);
                 }
 
             }
-            result[i][j] = m/scale;
+            result[i][j] = m;
         }
     }
 
     return result;
 }
-
-
-
 
 int main()
 {
@@ -275,7 +281,7 @@ int main()
     //image.Show();
 
 
-    std::vector<std::vector<float>> kernel = {{1, 1, 1},
+    std::vector<std::vector<float>> kernel1 = {{1, 1, 1},
                                               {1, 1, 1},
                                               {1, 1, 1}};
 
@@ -297,16 +303,11 @@ int main()
                                                {0, -1, -2, -1, 0},
                                                {0, 0, -1, 0, 0}};
 
-    std::vector<std::vector<float>> kernel5 = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                               {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+    std::vector<std::vector<float>> kernel5 = {{1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1},
+                                               {1, 1, 1, 1, 1}};
 
     std::vector<std::vector<float>> kernel6 = {{0, 1, 0},
                                                {1, -4, 1},
@@ -316,49 +317,12 @@ int main()
                                                {-1, 1, 1},
                                                {0, 1, 2}};
 
-    std::vector<std::vector<uchar>> test = {{1, 2, 3},
-                                            {4, 5, 6},
-                                            {7, 8, 9}};
 
-    // Padding: Constant, Expanded, Mirror, Repetition
-    //convolution(image.GetData(), kernel, 9, "Constant");
+    // Padding: constant, expanded, mirror, repetition
     Image<uchar> image2;
-    image2.SetData(convolution(image.GetData(), kernel7, 9, "Constant"));
-    //image2.SetData(convolution(test, kernel, 9, "Constant"));
+    image2.SetData(convolution(image.GetData(), kernel5, 25, "expanded"));
     image2.Show();
     //imprimir(convolution(image.GetData(), kernel, 9, "Constant"));
-
-
-    /*Image<uchar> image2;
-    image2.SetData(paddingConstantValue(image.GetData(), 100));
-    image2.Show();*/
-
-    //imprimir(paddingMirror(image.GetData(), 2));
-
-
-
-
-
-    /*std::vector<std::vector<unsigned>> imagen = {{1, 2, 3},
-                                                 {4, 5, 6},
-                                                 {7, 8, 9}};*/
-
-    /*imagen = {{1, 2, 3, 4, 5},
-              {2, 3, 4, 5, 6},
-              {3, 4, 5, 6, 7},
-              {4, 5, 6, 7, 8}};*/
-
-    //paddingConstantvalue(imagen, 1);
-
-
-    //imprimir(paddingConstantvalue(imagen, 2, 6));
-    //imprimir(paddingConstantvalue(imagen, 2, 7));
-
-
-
-
-
-
 
 
     return 0;

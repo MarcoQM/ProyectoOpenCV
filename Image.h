@@ -140,7 +140,6 @@ void Image<PixelType>::Show()
     else //RGB LAB, channels...
     {
         imageShow = cv::Mat(Rows, Columns, CV_8UC3);
-        std::cout<<Rows<<std::endl;
         for (unsigned r = 0; r < Rows; ++r)
         {
             cv::Vec3b* grayrow = imageShow.ptr<cv::Vec3b>(r);
