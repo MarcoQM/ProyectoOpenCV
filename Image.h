@@ -125,9 +125,10 @@ void Image<PixelType>::Show()
     if constexpr (std::is_fundamental<PixelType>::value) //uchar, short, float (gray)
     {
         imageShow = cv::Mat(Rows, Columns, CV_8UC1);
+        //imageShow = cv::Mat(Rows, Columns, CV_32FC1);
         for (unsigned r = 0; r < Rows; ++r)
         {
-            PixelType* grayrow = imageShow.ptr<PixelType>(r);
+            uchar* grayrow = imageShow.ptr<uchar>(r);
             for (unsigned c = 0; c < Columns; ++c)
             {
                 grayrow[c] = Data[r][c];

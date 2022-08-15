@@ -14,14 +14,14 @@ void imprimir(DataType<PixelType> imagen)
         for(unsigned j = 0; j < imagen[i].size(); ++j)
         {
             //std::cout<<imagen[i][j]<<" ";
-            std::cout<<static_cast<int>(imagen[i][j])<<" ";
+            std::cout<<static_cast<float>(imagen[i][j])<<" ";
         }
         std::cout<<std::endl;
     }
 }
 
 template<typename PixelType>
-DataType<PixelType> paddingConstantValue(DataType<PixelType>& imagen, unsigned paddingSize, uchar value = 0)
+DataType<PixelType> paddingConstantValue(DataType<PixelType>& imagen, unsigned paddingSize, float value = 0)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -229,7 +229,7 @@ DataType<PixelType> paddingPeriodicRepetitions(DataType<PixelType>& imagen, unsi
 
 // Padding, Kernel K, Factor de scala S, padding, valor de padding(solo caso1)
 template<typename PixelType>
-DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> kernel, int scale, std::string padding, unsigned valuePadding = 0)
+DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> kernel, float scale, std::string padding, unsigned valuePadding = 0)
 {
     std::size_t Rows = imagen.size();
     std::size_t Columns = imagen[0].size();
@@ -256,17 +256,57 @@ DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> ker
     {
         for(unsigned j = 0; j < Columns; ++j)
         {
-            PixelType m{0};
+            //PixelType m{0};
+            float m = 0;
             //for para el kernel
             for(unsigned h = 0; h < kernel.size(); ++h)
             {
                 for(unsigned k = 0; k < kernel[h].size(); ++k)
                 {
-                    m = m + (imagePadding[h+i][k+j] * kernel[h][k]/scale);
+                    m = m + ((imagePadding[h+i][k+j] * kernel[h][k]) / scale);
                 }
 
             }
             result[i][j] = m;
+            //std::cout<<m<<std::endl;
+        }
+    }
+
+    return result;
+}
+
+template<typename PixelType>
+DataType<PixelType> findContoursHC(DataType<PixelType>& image)
+{
+
+    //image2.SetData(convolution(image.GetData(), kernel7, 9, "expanded"));
+
+   // Operador de sobel segund derivada
+    std::vector<std::vector<float>> Hsx = {{-1, 0, 1},
+                                                {-2, 0, 2},
+                                                {-1, 0, 1}};
+
+    std::vector<std::vector<float>> Hsy = {{-1, -2, -1},
+                                                {0, 0, 0},
+                                                {1, 2, 1}};
+
+    // Padding: constant, expanded, mirror, repetition
+    DataType<PixelType> resHsx = convolution(image, Hsx, 6, "repetition");
+    DataType<PixelType> resHsy = convolution(image, Hsy, 6, "repetition");
+
+
+    // Encontrando la tangente
+    std::size_t Rows = image.size();
+    std::size_t Columns = image[0].size();
+
+
+    DataType<PixelType> result = DataType<PixelType>(Rows, std::vector<PixelType>(Columns, PixelType{0}));
+
+    for(unsigned i = 0; i < Rows; ++i)
+    {
+        for(unsigned j = 0; j < Columns; ++j)
+        {
+            result[i][j] = std::sqrt(std::pow(resHsx[i][j],2) + std::pow(resHsy[i][j],2));
         }
     }
 
@@ -275,12 +315,6 @@ DataType<PixelType> convolution(DataType<PixelType>& imagen, DataType<float> ker
 
 int main()
 {
-
-    Image<uchar> image;
-    image.Read("/home/marco/ProyectosQt/OpenCV_Example/image.jpg");
-    //image.Show();
-
-
     std::vector<std::vector<float>> kernel1 = {{1, 1, 1},
                                               {1, 1, 1},
                                               {1, 1, 1}};
@@ -317,12 +351,42 @@ int main()
                                                {-1, 1, 1},
                                                {0, 1, 2}};
 
+    std::vector<std::vector<float>> kernel8 = {{-1, 0, 1}};
+
+    std::vector<std::vector<float>> kernel9 = {{-1},
+                                               {0},
+                                               {1}};
+
+    std::vector<std::vector<float>> kernel10 = {{-1, 0, 1},
+                                                {-2, 0, 2},
+                                                {-1, 0, 1}};
+
+    std::vector<std::vector<float>> kernel11 = {{-1, -2, -1},
+                                                {0, 0, 0},
+                                                {1, 2, 1}};
+
+    std::vector<std::vector<float>> kernel12 = {{-3, 0, 3},
+                                                {-10, 0, 10},
+                                                {-3, 0, 3}};
+
+    Image<float> image;
+    image.Read("/home/marco/ProyectosQt/OpenCV_Example/lenna.png");
+    //image.Show();
 
     // Padding: constant, expanded, mirror, repetition
-    Image<uchar> image2;
-    image2.SetData(convolution(image.GetData(), kernel5, 25, "expanded"));
+    Image<float> image2;
+    //image2.SetData(convolution(image.GetData(), kernel5, 25, "repetition"));
+    //image2.SetData(convolution(image.GetData(), kernel3, 57, "repetition"));
+    //image2.Show();
+
+    //image2.SetData(convolution(image2.GetData(), kernel6, 9, "repetition"));
+    //image2.Show();
+
+    image2.SetData(findContoursHC(image.GetData()));
     image2.Show();
-    //imprimir(convolution(image.GetData(), kernel, 9, "Constant"));
+
+    //imprimir(image2.GetData());
+
 
 
     return 0;
