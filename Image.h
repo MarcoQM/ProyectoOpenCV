@@ -40,6 +40,8 @@ void Image<PixelType>::Read(const std::string& fileName)
 {
 
     cv::Mat image = cv::imread(fileName, cv::IMREAD_COLOR);
+    // Cambiando el tamanio de la imagen
+    cv::resize(image, image, cv::Size(32, 32), cv::INTER_LINEAR);
 
     if (!image.data)
     {
